@@ -20,7 +20,8 @@ create-azure-openai-deployment-variable \
 create-azure-openai-api-key-variable
 
 create-env-file:
-	-python -c "import shutil, os; os.path.exists('.env') or shutil.copy('.env.example', '.env')"
+	-cp -n .env.example .env
+	-cmd /c "if not exist .env copy .env.example .env"
 
 create-logs-dir:
 	-mkdir .\mnt\airflow-logs
