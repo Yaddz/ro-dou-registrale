@@ -1654,7 +1654,7 @@
                         this.showAlert('Erro ao conectar', 'error');
                     }
                 },
-                editingCompany: null,
+                editingCompany: {},
                 showEditCompanyModal: false,
                 openEditCompany(c) {
                     this.editingCompany = {
@@ -1669,10 +1669,10 @@
                 },
                 closeEditCompanyModal() {
                     this.showEditCompanyModal = false;
-                    this.editingCompany = null;
+                    this.editingCompany = {};
                 },
                 async submitEditCompany() {
-                    if (!this.editingCompany) return;
+                    if (!this.editingCompany || !this.editingCompany.id) return;
                     try {
                         const res = await fetch(`/api/companies/${this.editingCompany.id}`, {
                             method: 'PUT',
