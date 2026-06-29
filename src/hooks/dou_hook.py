@@ -65,7 +65,7 @@ class DOUHook(BaseHook):
 
         try:
             # First try with HTTPS
-            response = requests.get(self.IN_API_BASE_URL, params=payload, headers=headers, timeout=10)
+            response = requests.get(self.IN_API_BASE_URL, params=payload, headers=headers, timeout=30)
 
             # Extra Validation
             if not response.url.startswith("https://"):
@@ -81,7 +81,7 @@ class DOUHook(BaseHook):
             # Fallback for HTTP
             http_url = self.IN_API_BASE_URL.replace("https://", "http://")
             try:
-                response = requests.get(http_url, params=payload, headers=headers, timeout=10)
+                response = requests.get(http_url, params=payload, headers=headers, timeout=30)
                 response.raise_for_status()
                 logging.warning("Using HTTP fallback. Final URL: %s", response.url)
                 return response
@@ -94,7 +94,14 @@ class DOUHook(BaseHook):
             if with_retry:
                 logging.info("Sleep. Trying again in 30 seconds...")
                 time.sleep(30)
-                return requests.get(self.IN_API_BASE_URL, params=payload, headers=headers, timeout=10)
+                try:
+                    retry_resp = requests.get(self.IN_API_BASE_URL, params=payload, headers=headers, timeout=30)
+                    retry_resp.raise_for_status()
+                    return retry_resp
+                except requests.exceptions.RequestException as retry_err:
+                    logging.error("Retry failed: %s", retry_err)
+                    raise
+            raise
 
     def search_text(
         self,
@@ -184,12 +191,12 @@ class DOUHook(BaseHook):
             if script_tag is None:
                 logging.error(
                     "Script tag with ID '_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params' not found in DOU response. "
-                    "The DOU API may have changed its structure."
+                    f"HTTP Status: {page.status_code}. O servidor do DOU pode estar retornando erro 502/503 ou a estrutura mudou."
                 )
-                logging.info("HTML content received: %s", page.content)
+                logging.info("HTML content received (first 500 chars): %s...", str(page.content)[:500])
                 raise ValueError(
-                    "Unable to find search results in DOU response."
-                    "The DOU API may have changed its structure."
+                    f"Falha ao interpretar a resposta do DOU (Status {page.status_code}). "
+                    "O site pode estar fora do ar ou com instabilidade (ex: Erro 502 Bad Gateway). Verifique os logs."
                 )
 
             search_results = json.loads(script_tag.contents[0])["jsonArray"]

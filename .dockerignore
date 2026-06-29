@@ -1,0 +1,7 @@
+# .dockerignore
+**/__pycache__
+**/logs
+**/.git
+**/.env
+**/.venv
+mnt/

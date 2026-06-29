@@ -17,5 +17,5 @@ COPY . .
 # Expõe a porta do Flask
 EXPOSE 5000
 
-# Comando para iniciar o Dashboard
-CMD ["python", "app_dashboard.py"]
+# Comando para iniciar o Dashboard em produção usando Gunicorn
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app_dashboard:app"]

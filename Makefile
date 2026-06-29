@@ -19,7 +19,7 @@ create-azure-openai-deployment-variable \
 create-azure-openai-api-key-variable
 
 create-logs-dir:
-	mkdir .\mnt\airflow-logs
+	-mkdir .\mnt\airflow-logs
 
 
 AI_PROVIDERS ?=

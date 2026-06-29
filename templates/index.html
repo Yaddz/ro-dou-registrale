@@ -7,14 +7,63 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         [x-cloak] { display: none !important; }
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        
+        /* Light Mode - Tons de cinza suaves */
+        body { background-color: #f5f5f4; }
+        .bg-white { background-color: #fafaf9; }
+        .bg-slate-50 { background-color: #f5f5f4; }
+        .bg-slate-100 { background-color: #e7e5e4; }
+        .border-slate-200 { border-color: #d6d3d1; }
+        .border-slate-100 { border-color: #e7e5e4; }
+        
+        /* Dark Mode Premium Override - Cinza Escuro */
+        html.dark body { background-color: #1c1917; color: #f5f5f4; }
+        html.dark .bg-white { background-color: #292524 !important; border-color: #44403c !important; }
+        html.dark .bg-slate-50, html.dark .bg-slate-100 { background-color: #1c1917 !important; border-color: #292524 !important; }
+        html.dark [class*="bg-slate-50/"] { background-color: rgba(28, 25, 23, 0.5) !important; }
+        html.dark .bg-slate-900 { background-color: #78716c !important; color: #ffffff !important; }
+        html.dark .text-slate-900 { color: #f5f5f4 !important; }
+        html.dark .text-slate-600 { color: #d6d3d1 !important; }
+        html.dark .text-slate-500 { color: #a8a29e !important; }
+        html.dark .text-slate-400 { color: #78716c !important; }
+        html.dark .border-slate-100, html.dark .border-slate-200, html.dark .border-slate-50 { border-color: #44403c !important; }
+        html.dark .border-white { border-color: #292524 !important; }
+        html.dark input, html.dark select, html.dark textarea { background-color: #1c1917 !important; color: #f5f5f4 !important; border-color: #44403c !important; }
+        html.dark .glass-nav { background: rgba(41, 37, 36, 0.85) !important; border-bottom: 1px solid rgba(68, 64, 60, 0.8) !important; }
+        html.dark th, html.dark td, html.dark hr { border-color: #44403c !important; }
+        html.dark tr:hover { background-color: #292524 !important; }
+        html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #44403c !important; }
+        html.dark .glass { background: rgba(41, 37, 36, 0.7) !important; }
+        html.dark .text-blue-600 { color: #60a5fa !important; }
+        html.dark .text-blue-700 { color: #93bbfd !important; }
+        html.dark .hover\:text-blue-800:hover { color: #93bbfd !important; }
+        html.dark .bg-blue-50 { background-color: rgba(30, 58, 138, 0.3) !important; }
+        html.dark .border-blue-100 { border-color: rgba(96, 165, 250, 0.3) !important; }
+        html.dark .bg-slate-200 { background-color: #44403c !important; }
+        html.dark .bg-slate-300 { background-color: #57534e !important; }
+        html.dark [class*="bg-white/"] { background-color: rgba(41, 37, 36, 0.5) !important; }
+        html.dark .border-t-slate-900 { border-color: #f5f5f4 !important; }
+        
+        /* Dark Mode Shadows Fix */
+        html.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.5) !important; }
+        html.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.5) !important; }
+        html.dark .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5) !important; }
     </style>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="bg-[#FAFAFA] text-slate-900" x-data="dashboard">
+<body class="bg-[#f5f5f4] text-slate-900" x-data="dashboard">
 
     <!-- Alerta Interno Premium -->
     <div x-show="alert.show" 
@@ -45,7 +94,7 @@
     <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="fixed left-0 top-0 h-screen bg-white border-r border-slate-200 transition-all duration-300 z-30 flex flex-col shadow-sm">
         <div :class="sidebarOpen ? 'p-6' : 'py-6 px-0 justify-center'" class="flex items-center gap-3 overflow-hidden transition-all duration-300">
             <div class="bg-slate-900 text-white rounded-xl p-2 shrink-0 shadow-lg shadow-slate-200">
-                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                <i data-lucide="bot-message-square" class="w-6 h-6"></i>
             </div>
             <span x-show="sidebarOpen" x-transition.opacity class="font-bold text-xl tracking-tight">Registrale</span>
         </div>
@@ -83,12 +132,6 @@
                 <i data-lucide="building-2" class="w-5 h-5"></i>
                 <span x-show="sidebarOpen" class="text-sm font-semibold">Empresas</span>
             </button>
-            {% if user.role == 'master' %}
-            <button @click="activeTab = 'integrations'" :class="activeTab === 'integrations' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:bg-slate-50'" class="w-full flex items-center gap-4 p-3 rounded-xl transition-all">
-                <i data-lucide="plug-zap" class="w-5 h-5"></i>
-                <span x-show="sidebarOpen" class="text-sm font-semibold">Integrações</span>
-            </button>
-            {% endif %}
             <button @click="activeTab = 'reports'" :class="activeTab === 'reports' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:bg-slate-50'" class="w-full flex items-center gap-4 p-3 rounded-xl transition-all">
                 <i data-lucide="file-text" class="w-5 h-5"></i>
                 <span x-show="sidebarOpen" class="text-sm font-semibold">Relatórios</span>
@@ -97,9 +140,9 @@
 
         <div class="p-4 border-t border-slate-100 space-y-1">
             {% if user.role == 'master' %}
-            <button @click="activeTab = 'master'" :class="activeTab === 'master' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-400 hover:text-slate-900'" class="w-full flex items-center gap-4 p-3 rounded-xl transition-colors">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                <span x-show="sidebarOpen" class="text-sm font-semibold">Gestão de Usuários</span>
+            <button @click="activeTab = 'settings'" :class="activeTab === 'settings' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-400 hover:text-slate-900'" class="w-full flex items-center gap-4 p-3 rounded-xl transition-colors">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                <span x-show="sidebarOpen" class="text-sm font-semibold">Configurações</span>
             </button>
             {% endif %}
             <a href="/logout" class="w-full flex items-center gap-4 p-3 rounded-xl text-red-400 hover:bg-red-50 transition-colors">
@@ -130,10 +173,14 @@
                 </div>
             </div>
             <div class="flex items-center gap-4">
+                <button @click="toggleDarkMode()" class="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-sm">
+                    <i data-lucide="moon" x-show="!darkMode" class="w-5 h-5"></i>
+                    <i data-lucide="sun" x-show="darkMode" x-cloak class="w-5 h-5"></i>
+                </button>
                 <button @click="triggerSync()" 
                         :disabled="isSyncing"
-                        :class="isSyncing ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-blue-300 active:scale-95'"
-                        class="text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-200 text-xs font-bold transition-all flex items-center gap-2">
+                        :class="isSyncing ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500 active:scale-95'"
+                        class="text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-500 text-xs font-bold transition-all flex items-center gap-2">
                     <i data-lucide="refresh-cw" class="w-4 h-4" :class="isSyncing && 'animate-spin'"></i>
                     <span x-text="isSyncing ? 'Sincronizando...' : 'Sincronizar Agora'"></span>
                 </button>
@@ -227,10 +274,19 @@
                     <p class="text-sm font-bold text-slate-600">Carregando listagem completa...</p>
                 </div>
 
-                <div class="p-8 border-b border-slate-100 flex items-center justify-between">
-                    <h2 class="font-bold text-xl text-slate-900">Listagem Geral de Menções</h2>
-                    <div class="bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total: <span class="text-slate-900" x-text="allMentions.length"></span></p>
+                <div class="p-8 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <h2 class="font-bold text-xl text-slate-900 shrink-0">Listagem Geral de Menções</h2>
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <div class="relative flex-1 md:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <input type="text" x-model="mentionsSearchQuery" placeholder="Buscar empresa ou CNPJ..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                        </div>
+                        <div class="relative">
+                            <input type="date" x-model="mentionsDateFilter" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none text-slate-500">
+                        </div>
+                        <div class="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 shrink-0">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total: <span class="text-slate-900" x-text="filteredAllMentions.length"></span></p>
+                        </div>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -244,7 +300,12 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <template x-for="m in allMentions" :key="m.id + m.data">
+                            <template x-if="filteredAllMentions.length === 0">
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-slate-400 text-sm">Nenhuma menção encontrada com os filtros atuais.</td>
+                                </tr>
+                            </template>
+                            <template x-for="m in filteredAllMentions.slice(0, 100)" :key="m.cnpj + '_' + m.id">
                                 <tr class="hover:bg-slate-50/50 transition-colors group">
                                     <td class="px-8 py-5">
                                         <p class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors" x-text="m.empresa"></p>
@@ -262,7 +323,10 @@
                                             <button @click="openDetails(m)" class="p-2.5 bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all shadow-sm">
                                                 <i data-lucide="eye" class="w-4 h-4"></i>
                                             </button>
-                                            <a :href="m.link" target="_blank" class="p-2.5 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm">
+                                            <button @click="openEmailModal([m])" class="p-2.5 bg-slate-50 text-slate-400 hover:bg-stone-700 hover:text-white rounded-xl transition-all shadow-sm">
+                                                <i data-lucide="mail" class="w-4 h-4"></i>
+                                            </button>
+                                            <a :href="m.link" target="_blank" class="p-2.5 bg-slate-50 text-slate-400 hover:bg-stone-700 hover:text-white rounded-xl transition-all shadow-sm">
                                                 <i data-lucide="external-link" class="w-4 h-4"></i>
                                             </a>
                                         </div>
@@ -278,13 +342,40 @@
         <!-- Tab: Empresas -->
         <div x-show="activeTab === 'companies'" x-cloak class="space-y-6 animate-in fade-in">
             <div class="flex items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="relative flex-1">
-                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                    <input type="text" x-model="searchQuery" placeholder="Buscar por Razão Social ou CNPJ..." class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5">
+                <div class="flex-1 space-y-3">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                        <input type="text" x-model="searchQuery" placeholder="Buscar por Razão Social ou CNPJ..." class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5">
+                    </div>
+                    <div class="flex gap-3">
+                        <select x-model="ufFilter" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 focus:outline-none">
+                            <option value="">Todas as UFs</option>
+                            <template x-for="u in uniqueUFs" :key="u"><option :value="u" x-text="u"></option></template>
+                        </select>
+                        <select x-model="origemFilter" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 focus:outline-none">
+                            <option value="">Qualquer Origem</option>
+                            <template x-for="o in uniqueOrigens" :key="o"><option :value="o" x-text="o"></option></template>
+                        </select>
+                        <select x-model="statusFilter" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 focus:outline-none">
+                            <option value="">Qualquer Status</option>
+                            <option value="true">Monitorado</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </div>
                 </div>
-                <a href="/api/export_report" class="flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all">
-                    <i data-lucide="download" class="w-4 h-4"></i> Exportar CSV
-                </a>
+                <div class="flex flex-col gap-2 justify-end">
+                    <div class="flex gap-2">
+                        <button @click="triggerSync()" class="flex-1 flex justify-center items-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-sm active:scale-95">
+                            <i data-lucide="refresh-cw" class="w-4 h-4" :class="isSyncing && 'animate-spin'"></i> GestãoClick
+                        </button>
+                        <button @click="openAddCompanyModal()" class="flex-1 flex justify-center items-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm active:scale-95">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Inserir Manual
+                        </button>
+                        <a href="/api/export_report" class="flex items-center justify-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-3 rounded-xl text-sm font-bold hover:bg-emerald-200 transition-all shadow-sm" title="Exportar Excel">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> EXCEL
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm min-h-[400px] relative">
@@ -298,6 +389,7 @@
                             <th class="px-6 py-4">Razão Social</th>
                             <th class="px-6 py-4">CNPJ</th>
                             <th class="px-6 py-4">UF / Cidade</th>
+                            <th class="px-6 py-4">Origem</th>
                             <th class="px-6 py-4 text-center">Monitor (DAG)</th>
                             <th class="px-6 py-4 text-center">Histórico</th>
                         </tr>
@@ -311,14 +403,20 @@
                                     <p class="text-xs font-bold text-slate-700" x-text="c.uf"></p>
                                     <p class="text-[10px] text-slate-400" x-text="c.cidade"></p>
                                 </td>
+                                <td class="px-6 py-4 text-xs font-bold text-slate-500" x-text="c.origem"></td>
                                 <td class="px-6 py-4 text-center">
-                                    <span x-show="c.status" class="bg-blue-600 text-white px-2 py-1 rounded text-[9px] font-black uppercase shadow-sm shadow-blue-100">Monitorado</span>
+                                    <span x-show="c.status" class="bg-stone-700 text-white px-2 py-1 rounded text-[9px] font-black uppercase shadow-sm shadow-stone-500">Monitorado</span>
                                     <span x-show="!c.status" class="bg-slate-100 text-slate-400 px-2 py-1 rounded text-[9px] font-black uppercase">Inativo</span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <button @click="openHistory(c)" class="inline-flex items-center justify-center p-2.5 hover:bg-slate-900 hover:text-white border border-slate-200 rounded-xl transition-all shadow-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                    </button>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button @click="openEditCompany(c)" class="p-2.5 bg-slate-50 text-slate-400 hover:bg-stone-700 hover:text-white rounded-xl transition-all shadow-sm" title="Editar">
+                                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                                        </button>
+                                        <button @click="openHistory(c)" class="inline-flex items-center justify-center p-2.5 hover:bg-slate-900 hover:text-white border border-slate-200 rounded-xl transition-all shadow-sm" title="Histórico">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </template>
@@ -327,57 +425,68 @@
             </div>
         </div>
 
-        <!-- Tab: Usuários -->
-        <div x-show="activeTab === 'master'" x-cloak class="space-y-8 animate-in fade-in">
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-lg mb-6">Novo Usuário</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Username</label>
-                        <input type="text" x-model="newU.username" placeholder="Usuário" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Senha</label>
-                        <input type="password" x-model="newU.password" placeholder="••••" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Nível</label>
-                        <select x-model="newU.role" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
-                            <option value="user">Consulta</option>
-                            <option value="master">Master</option>
-                        </select>
-                    </div>
-                    <button @click="addUser()" class="bg-slate-900 text-white p-2.5 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95">Criar Acesso</button>
-                </div>
-            </div>
-            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
-                        <tr>
-                            <th class="px-6 py-4">Usuário</th>
-                            <th class="px-6 py-4">Nível</th>
-                            <th class="px-6 py-4 text-right">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <template x-for="u in internalUsers" :key="u.username">
-                            <tr class="hover:bg-slate-50/50">
-                                <td class="px-6 py-4 text-sm font-bold" x-text="u.username"></td>
-                                <td class="px-6 py-4"><span :class="u.role === 'master' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'" class="text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm" x-text="u.role"></span></td>
-                                <td class="px-6 py-4 text-right">
-                                    <button @click="delUser(u.username)" class="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Tab: Integrações -->
+            <!-- Tab: Configurações -->
         {% if user.role == 'master' %}
-        <div x-show="activeTab === 'integrations'" x-cloak class="max-w-4xl space-y-8 animate-in fade-in">
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-8">
+        <div x-show="activeTab === 'settings'" x-cloak class="animate-in fade-in max-w-6xl w-full flex flex-col lg:flex-row gap-8">
+            <div class="w-full lg:w-64 shrink-0 space-y-2">
+                <h2 class="text-xl font-bold mb-6 text-slate-900">Configurações</h2>
+                <button @click="settingsSubTab = 'users'" :class="settingsSubTab === 'users' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-white hover:shadow-sm'" class="w-full text-left p-3 rounded-xl font-bold text-sm transition-all flex items-center gap-3"><i data-lucide="users" class="w-4 h-4"></i> Usuários</button>
+                <button @click="settingsSubTab = 'integrations'" :class="settingsSubTab === 'integrations' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-white hover:shadow-sm'" class="w-full text-left p-3 rounded-xl font-bold text-sm transition-all flex items-center gap-3"><i data-lucide="plug-zap" class="w-4 h-4"></i> Integrações</button>
+                <button @click="settingsSubTab = 'templates'" :class="settingsSubTab === 'templates' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-white hover:shadow-sm'" class="w-full text-left p-3 rounded-xl font-bold text-sm transition-all flex items-center gap-3"><i data-lucide="mail" class="w-4 h-4"></i> Templates de E-mail</button>
+                <button @click="settingsSubTab = 'clean'" :class="settingsSubTab === 'clean' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white hover:shadow-sm'" class="w-full text-left p-3 rounded-xl font-bold text-sm transition-all flex items-center gap-3"><i data-lucide="trash-2" class="w-4 h-4"></i> Limpeza de Sistema</button>
+            </div>
+            
+            <div class="flex-1 space-y-8">
+                <!-- Sub Tab: Users -->
+                <div x-show="settingsSubTab === 'users'" class="space-y-8">
+                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-6">Novo Usuário</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Username</label>
+                                <input type="text" x-model="newU.username" placeholder="Usuário" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Senha</label>
+                                <input type="password" x-model="newU.password" placeholder="•••••" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Nível</label>
+                                <select x-model="newU.role" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                                    <option value="user">Consulta</option>
+                                    <option value="master">Master</option>
+                                </select>
+                            </div>
+                            <button @click="addUser()" class="bg-slate-900 text-white p-2.5 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95">Criar Acesso</button>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
+                                <tr>
+                                    <th class="px-6 py-4">Usuário</th>
+                                    <th class="px-6 py-4">Nível</th>
+                                    <th class="px-6 py-4 text-right">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <template x-for="u in internalUsers" :key="u.username">
+                                    <tr class="hover:bg-slate-50/50">
+                                        <td class="px-6 py-4 text-sm font-bold" x-text="u.username"></td>
+                                        <td class="px-6 py-4"><span :class="u.role === 'master' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'" class="text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm" x-text="u.role"></span></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button @click="delUser(u.username)" class="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sub Tab: Integrations -->
+                <div x-show="settingsSubTab === 'integrations'" class="space-y-8">
+                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-8">
                 <div>
                     <h3 class="font-bold text-lg flex items-center gap-3 mb-6"><i data-lucide="mail" class="w-5 h-5 text-slate-400"></i> SMTP & Notificações</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -385,8 +494,20 @@
                         <div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">Porta</label><input type="text" x-model="settings.smtp.port" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none"></div>
                         <div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">Usuário</label><input type="text" x-model="settings.smtp.user" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none"></div>
                         <div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">Senha</label><input type="password" x-model="settings.smtp.password" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none"></div>
+                        <div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">Email de Envio (From)</label><input type="email" x-model="settings.smtp.from_email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="noreply@exemplo.com"></div>
+                    </div>
+                    <div class="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col md:flex-row items-end gap-4">
+                        <div class="flex-1 space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Destinatário para teste SMTP</label>
+                            <input type="email" x-model="testEmail" placeholder="teste@exemplo.com" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none">
+                        </div>
+                        <button @click="testSmtpConnection()" class="bg-slate-900 text-white px-6 py-3.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2 active:scale-95" :disabled="isTestingSmtp">
+                            <i data-lucide="send" class="w-3.5 h-3.5" :class="isTestingSmtp && 'animate-pulse'"></i>
+                            <span x-text="isTestingSmtp ? 'Enviando...' : 'Enviar Email de Teste'"></span>
+                        </button>
                     </div>
                 </div>
+                
                 <hr class="border-slate-100">
                 <div>
                     <h3 class="font-bold text-lg flex items-center gap-3 mb-6"><i data-lucide="key" class="w-5 h-5 text-slate-400"></i> API GestãoClick & Caminhos</h3>
@@ -400,13 +521,98 @@
                             <div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">Secret Access Token</label><input type="password" x-model="settings.api_keys.gestaoclick_secret_token" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none"></div>
                         </div>
                     </div>
+                    </div>
+                    <div class="pt-6 flex justify-end">
+                        <button @click="saveSettings(settings)" class="bg-slate-900 text-white px-10 py-4 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-xl active:scale-95">Salvar Configurações</button>
+                    </div>
                 </div>
-                <div class="pt-6 flex justify-end">
-                    <button @click="saveSettings(settings)" class="bg-slate-900 text-white px-10 py-4 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-xl active:scale-95">Salvar Configurações</button>
+            </div>
+
+                            <!-- Sub Tab: Templates -->
+                <div x-show="settingsSubTab === 'templates'" class="space-y-8" x-cloak>
+                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-3"><i data-lucide="layout-template" class="w-5 h-5 text-slate-400"></i> Templates de E-mail</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">Nome do Template</label><input type="text" x-model="editingTemplate.name" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="Ex: Aviso Padrão"></div>
+                                <div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">Assunto</label><input type="text" x-model="editingTemplate.subject" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="Assunto do email"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase">Corpo do Email</label>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-500">Preview</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" x-model="editingTemplate.showHtml" class="sr-only peer">
+                                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-stone-700"></div>
+                                        </label>
+                                        <span class="text-xs font-bold text-slate-500">Edição</span>
+                                    </div>
+                                </div>
+                                <div x-show="!editingTemplate.showHtml" class="border border-slate-200 rounded-xl overflow-hidden">
+                                    <iframe class="w-full bg-white" style="min-height:300px;max-height:400px;border:none;" :srcdoc="editingTemplate.body_html || '<p style=&quot;color:#94a3b8&quot;>Digite o HTML para ver o preview...</p>'"></iframe>
+                                </div>
+                                <div x-show="editingTemplate.showHtml">
+                                    <textarea x-model="editingTemplate.body_html" rows="12" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none" placeholder="<h1>Olá</h1>..."></textarea>
+                                </div>
+                                <p class="text-xs text-slate-500">Variáveis: {empresa}, {cnpj}, {secao}, {data}, {trecho}, {link}, {content}</p>
+                            </div>
+                            <button @click="saveTemplate()" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center gap-2">Salvar Template</button>
+                        </div>
+
+                        <hr class="my-8 border-slate-100">
+
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
+                                <tr>
+                                    <th class="px-6 py-4">Nome</th>
+                                    <th class="px-6 py-4">Assunto</th>
+                                    <th class="px-6 py-4 text-right">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <template x-for="t in emailTemplates" :key="t.id">
+                                    <tr class="hover:bg-slate-50/50">
+                                        <td class="px-6 py-4 text-sm font-bold" x-text="t.name"></td>
+                                        <td class="px-6 py-4 text-sm text-slate-500" x-text="t.subject"></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button @click="editTemplate(t)" class="text-blue-500 hover:text-blue-700 p-2"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                                            <button x-show="t.name !== 'Padrão Registrale'" @click="deleteTemplate(t.id)" class="text-red-400 hover:text-red-600 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Sub Tab: Clean -->
+            <div x-show="settingsSubTab === 'clean'" class="space-y-8">
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg flex items-center gap-3 mb-6 text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i> Limpeza de Sistema</h3>
+                    <p class="text-sm text-slate-500 mb-6">Atenção: As ações abaixo são irreversíveis. Use com cautela.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button @click="clearSystemData('all')" class="flex flex-col items-center justify-center p-6 border-2 border-red-100 bg-red-50 text-red-600 rounded-2xl hover:bg-red-600 hover:text-white transition-all active:scale-95 text-center gap-2">
+                            <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                            <span class="font-black text-sm">Limpar Dados</span>
+                            <span class="text-[10px] opacity-80 uppercase tracking-widest">Reseta todo o banco</span>
+                        </button>
+                        <button @click="clearSystemData('history')" class="flex flex-col items-center justify-center p-6 border-2 border-orange-100 bg-orange-50 text-orange-600 rounded-2xl hover:bg-orange-600 hover:text-white transition-all active:scale-95 text-center gap-2">
+                            <i data-lucide="history" class="w-8 h-8"></i>
+                            <span class="font-black text-sm">Limpar Histórico</span>
+                            <span class="text-[10px] opacity-80 uppercase tracking-widest">Arquivos de cache</span>
+                        </button>
+                        <button @click="clearSystemData('mentions')" class="flex flex-col items-center justify-center p-6 border-2 border-slate-200 bg-white text-slate-600 rounded-2xl hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all active:scale-95 text-center gap-2">
+                            <i data-lucide="file-x" class="w-8 h-8"></i>
+                            <span class="font-black text-sm">Limpar Menções</span>
+                            <span class="text-[10px] opacity-80 uppercase tracking-widest">Apagar lidas do painel</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endif %}
+    </div>
+    {% endif %}
 
         <!-- Tab: Rotinas de Busca -->
         <div x-show="activeTab === 'routines'" x-cloak class="space-y-6 animate-in fade-in">
@@ -427,7 +633,7 @@
                     <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:border-slate-300 transition-all group">
                         <div class="flex items-start justify-between">
                             <div class="flex gap-6">
-                                <div :class="r.type === 'sync' ? 'bg-blue-600 shadow-blue-100' : 'bg-slate-900 shadow-slate-100'" class="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl shrink-0">
+                                <div :class="r.type === 'sync' ? 'bg-stone-700 shadow-stone-500' : 'bg-slate-900 shadow-slate-100'" class="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl shrink-0">
                                     <i :data-lucide="r.type === 'sync' ? 'refresh-cw' : 'search'" class="w-7 h-7"></i>
                                 </div>
                                 <div>
@@ -457,12 +663,20 @@
                                         <button @click="triggerRoutine(r.file)" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2 shadow-sm active:scale-95">
                                             <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Pesquisar no DOU
                                         </button>
+                                        <button @click="monthlySearchModal = true" class="bg-stone-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-stone-800 transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Busca Mensal
+                                        </button>
                                     </div>
                                 </template>
                                 <template x-if="r.type !== 'sync'">
-                                    <button @click="triggerRoutine(r.file)" class="bg-white border border-slate-200 text-slate-900 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                                        <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Rodar Agora
-                                    </button>
+                                    <div class="flex items-center gap-2">
+                                        <button @click="triggerRoutine(r.file)" class="bg-white border border-slate-200 text-slate-900 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                                            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Rodar Agora
+                                        </button>
+                                        <button @click="openMonthlySearch(r.file)" class="bg-stone-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-stone-800 transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Busca Mensal
+                                        </button>
+                                    </div>
                                 </template>
                                 {% if user.role == 'master' %}
                                 <div class="flex items-center gap-1 border-l border-slate-100 pl-3 ml-1">
@@ -495,6 +709,85 @@
                         </div>
                     </div>
                 </template>
+            </div>
+        </div>
+
+        <!-- Modal: Trigger Routine -->
+        <div x-show="triggerDateModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm" x-transition.opacity>
+            <div @click.away="triggerDateModal = false" class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl overflow-hidden flex flex-col animate-in zoom-in duration-200">
+                <div class="p-6 border-b border-slate-50">
+                    <h3 class="font-bold text-lg">Disparar Rotina</h3>
+                    <p class="text-sm text-slate-500 mt-1">Deseja pesquisar para uma data específica?</p>
+                </div>
+                <div class="p-6">
+                    <label class="block text-xs font-bold text-slate-600 mb-2">Data Lógica (Opcional)</label>
+                    <input type="date" x-model="triggerLogicalDate" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-slate-900 outline-none" title="Se vazio, usa a data atual">
+                    <p class="text-[10px] text-slate-400 mt-2">Útil para refazer buscas de dias anteriores.</p>
+                </div>
+                <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 shrink-0">
+                    <button @click="triggerDateModal = false" class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all">Cancelar</button>
+                    <button @click="confirmTriggerRoutine()" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all flex items-center gap-2 active:scale-95">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> Iniciar Busca
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Busca Mensal -->
+        <div x-show="monthlySearchModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm" x-transition.opacity>
+            <div @click.away="!monthlySearchRunning && (monthlySearchModal = false)" class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl overflow-hidden flex flex-col animate-in zoom-in duration-200">
+                <div class="p-6 border-b border-slate-50">
+                    <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-slate-400"></i> Busca Mensal</h3>
+                    <p class="text-sm text-slate-500 mt-1">Dispara busca para todos os dias do mês.</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5"></i>
+                        <div class="text-sm text-amber-700">
+                            <p class="font-bold">Atenção: Processo demorado</p>
+                            <p class="text-xs mt-1">Cada dia gera um trigger. Com 30 dias, o processo pode levar várias horas. Não feche o navegador.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Mês</label>
+                            <select x-model.number="monthlySearchMonth" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" :disabled="monthlySearchRunning">
+                                <option value="1">Janeiro</option>
+                                <option value="2">Fevereiro</option>
+                                <option value="3">Março</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Ano</label>
+                            <input type="number" x-model.number="monthlySearchYear" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" min="2024" max="2030" :disabled="monthlySearchRunning">
+                        </div>
+                    </div>
+                    <div x-show="monthlySearchRunning" class="p-4 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>
+                            <p class="text-sm text-slate-600" x-text="monthlySearchProgress"></p>
+                        </div>
+                        <div class="mt-3 w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-slate-900 h-2 rounded-full transition-all duration-300" :style="'width:' + monthlySearchPercent + '%'"></div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2" x-text="monthlySearchDetail"></p>
+                    </div>
+                </div>
+                <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 shrink-0">
+                    <button @click="!monthlySearchRunning && (monthlySearchModal = false)" class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all" :disabled="monthlySearchRunning">Fechar</button>
+                    <button @click="startMonthlySearch()" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all flex items-center gap-2 active:scale-95" :disabled="monthlySearchRunning" x-show="!monthlySearchRunning">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> Iniciar
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -569,6 +862,20 @@
                                     <p class="text-[9px] text-slate-400 mt-2 italic">Separe por vírgula. Deixe vazio para buscar em todos.</p>
                                 </div>
                             </div>
+                            <div class="grid grid-cols-2 gap-6 mt-6">
+                                <div class="space-y-3">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Tipo de Busca</label>
+                                    <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition-all">
+                                        <input type="checkbox" x-model="currentR.is_exact_search" class="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900">
+                                        <span class="text-xs font-bold text-slate-700">Busca por termo exato</span>
+                                    </label>
+                                    <p class="text-[9px] text-slate-400 mt-1 italic">Desmarque para busca aproximada (pode trazer mais falso-positivos).</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ignorar Termos (um por linha)</label>
+                                    <textarea x-model="currentR.terms_ignore_raw" rows="3" placeholder="Ex: Termo para ignorar" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none"></textarea>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -603,9 +910,17 @@
                     <h2 class="font-bold text-xl text-slate-900">Relatórios de Menções</h2>
                     <p class="text-sm text-slate-400 mt-1">Filtre, analise e exporte as publicações encontradas.</p>
                 </div>
-                <button @click="exportFilteredReports()" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2 active:scale-95">
-                    <i data-lucide="download" class="w-5 h-5"></i> Exportar CSV Filtrado
-                </button>
+                <div class="flex gap-3">
+                    <button @click="exportFilteredExcel()" class="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-5 py-3 rounded-xl text-sm font-bold hover:bg-emerald-200 transition-all active:scale-95">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> EXCEL
+                    </button>
+                    <button @click="exportFilteredPDF()" class="flex items-center gap-2 bg-red-100 text-red-700 px-5 py-3 rounded-xl text-sm font-bold hover:bg-red-200 transition-all active:scale-95">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> PDF
+                    </button>
+                    <button @click="sendReportEmail()" class="flex items-center gap-2 bg-stone-700 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-stone-800 transition-all active:scale-95">
+                        <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Email
+                    </button>
+                </div>
             </div>
 
             <!-- Filtros -->
@@ -705,7 +1020,7 @@
                                     <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">Nenhum resultado encontrado para os filtros atuais.</td>
                                 </tr>
                             </template>
-                            <template x-for="m in filteredReports.slice(0, 100)" :key="m.id">
+                            <template x-for="m in filteredReports.slice(0, 100)" :key="m.cnpj + '_' + m.id">
                                 <tr class="hover:bg-slate-50/50 transition-colors" :class="selectedMentions.includes(m.id) ? 'bg-blue-50/30' : ''">
                                     <td class="px-6 py-4 text-center">
                                         <input type="checkbox" :value="m.id" x-model="selectedMentions" class="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer">
@@ -735,8 +1050,22 @@
         </div>
 
     <!-- Modais -->
+    <div x-show="timeLeft > 0 && timeLeft <= 60" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+        <div class="bg-white rounded-[2rem] w-full max-w-sm p-8 shadow-2xl animate-in zoom-in-95 text-center">
+            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="clock" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 tracking-tight">Sessão Expirando</h3>
+            <p class="text-slate-500 mt-2 text-sm leading-relaxed">Sua sessão irá expirar em <span class="font-bold text-slate-900" x-text="timeLeft"></span> segundos. Deseja continuar logado?</p>
+            <div class="mt-8 flex gap-3">
+                <button @click="window.location.href = '/logout'" class="flex-1 px-4 py-3 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-colors">Sair</button>
+                <button @click="extendSession()" class="flex-1 px-4 py-3 bg-stone-700 text-white font-bold rounded-xl shadow-lg shadow-stone-600 hover:bg-stone-800 hover:shadow-stone-600 transition-all">Continuar</button>
+            </div>
+        </div>
+    </div>
+
     <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm" x-transition.opacity>
-        <div @click.away="modalOpen = false" class="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+        <div @click.away="modalOpen = false" class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
             <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-white shrink-0">
                 <h3 class="font-bold text-xl">Detalhes da Menção</h3>
                 <button @click="modalOpen = false" class="p-2 hover:bg-slate-100 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
@@ -744,7 +1073,7 @@
             <div class="p-10 space-y-6">
                 <div><label class="text-[10px] font-bold text-slate-400 uppercase">Empresa</label><p class="font-black text-2xl text-slate-900" x-text="selectedMention.empresa"></p><p class="text-sm text-slate-500 font-mono" x-text="selectedMention.cnpj"></p></div>
                 <div class="flex gap-12"><div><label class="text-[10px] font-bold text-slate-400 uppercase">Seção / Data</label><p class="font-bold"><span class="text-blue-700 uppercase" x-text="selectedMention.secao"></span> <span class="mx-2 text-slate-200">·</span> <span x-text="selectedMention.data" class="text-slate-600"></span></p></div></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Trecho Localizado</label><div class="mt-3 p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-600 text-[13px] italic leading-relaxed" x-text="selectedMention.trecho"></div></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Trecho Localizado</label><div class="mt-3 p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-600 text-[13px] leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap font-mono" x-text="selectedMention.trecho"></div></div>
                 <div x-show="selectedMention.link"><a :href="selectedMention.link" target="_blank" class="flex items-center justify-center gap-2 w-full bg-blue-50 text-blue-700 py-4 rounded-2xl font-bold hover:bg-blue-100 transition-all border border-blue-100"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir Publicação Oficial</a></div>
             </div>
             <div class="p-8 border-t border-slate-50 flex justify-end bg-slate-50/50 shrink-0">
@@ -780,7 +1109,10 @@
                     </div>
                 </template>
             </div>
-            <div class="p-8 border-t border-slate-50 flex justify-end bg-slate-50/50 shrink-0">
+            <div class="p-8 border-t border-slate-50 flex justify-end gap-3 bg-slate-50/50 shrink-0">
+                <button @click="openEmailModal(companyHistory)" class="bg-stone-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-stone-800 transition-all flex items-center gap-2 active:scale-95">
+                    <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Email
+                </button>
                 <button @click="historyModalOpen = false" class="bg-slate-900 text-white px-10 py-3 rounded-xl font-bold hover:shadow-lg active:scale-95 transition-all">Fechar</button>
             </div>
         </div>
@@ -791,18 +1123,41 @@
             Alpine.data('dashboard', () => ({
                 sidebarOpen: true,
                 activeTab: 'home',
+                settingsSubTab: 'users',
+                darkMode: localStorage.getItem('darkMode') === 'true',
+                
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('darkMode', this.darkMode);
+                    if(this.darkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
                 modalOpen: false,
                 historyModalOpen: false,
                 selectedMention: {},
                 companyHistory: [],
                 selectedCompany: {},
                 searchQuery: '',
+                ufFilter: '',
+                origemFilter: '',
+                statusFilter: '',
+                mentionsSearchQuery: '',
+                mentionsDateFilter: '',
                 allMentions: [],
                 loadingMentions: false,
-                companies: [],
+                                companies: [],
+                newCompany: {nome:'', cnpj:'', uf:'', cidade:'', email:'', telefone:'', situacao:'Ativa', status:true, origem:'Manual'},
+                showAddCompanyModal: false,
+                emailTemplates: [],
+                editingTemplate: {id:null, name:'', subject:'', body_html:'', showHtml: false},
+                showEmailModal: false,
+                emailForm: {mentions:[], to_emails:'', subject:'', body_html:'', templateId:'', showHtml:false},
                 loadingCompanies: false,
                 internalUsers: {{ users | tojson | safe }},
-                settings: {{ settings | tojson | safe }},
+                settings: Object.assign({smtp:{}, api_keys:{}, }, {{ settings | tojson | safe }}),
                 kpis: {{ init_data.kpis | tojson | safe }},
                 newU: {username: '', password: '', role: 'user'},
                 timeLeft: {{ time_left }},
@@ -814,7 +1169,22 @@
                 loadingRoutines: false,
                 routineModal: false,
                 editMode: false,
-                currentR: { id: '', name: '', file: '', schedule: '0 5 * * *', simple_schedule: '0 5 * * *', terms_raw: '', organs_raw: '', sections: [], emails_raw: '', subject: '', type: 'custom' },
+                triggerDateModal: false,
+                triggerDateFile: '',
+                triggerLogicalDate: '',
+                monthlySearchModal: false,
+                monthlySearchMonth: new Date().getMonth() + 1,
+                monthlySearchYear: new Date().getFullYear(),
+                monthlySearchRunning: false,
+                monthlySearchProgress: '',
+                monthlySearchPercent: 0,
+                monthlySearchDetail: '',
+                monthlySearchRoutine: 'all',
+                monthlySearchFile: '',
+                currentR: { id: '', name: '', file: '', schedule: '0 5 * * *', simple_schedule: '0 5 * * *', terms_raw: '', organs_raw: '', sections: [], emails_raw: '', subject: '', type: 'custom', is_exact_search: true, terms_ignore_raw: '' },
+                isExportingSheets: false,
+                testEmail: '',
+                isTestingSmtp: false,
 
                 // Reports Management (Refactored)
                 reportFilters: { search: '', section: '', startDate: '', endDate: '', selectedCompanies: [] },
@@ -827,10 +1197,32 @@
                     return Array.from(map.entries()).map(([cnpj, nome]) => ({cnpj, nome}));
                 },
 
+                get filteredAllMentions() {
+                    if (!this.allMentions) return [];
+                    let result = this.allMentions;
+                    
+                    if (this.mentionsSearchQuery) {
+                        const q = this.mentionsSearchQuery.toLowerCase();
+                        result = result.filter(m => 
+                            (m.empresa || '').toLowerCase().includes(q) || 
+                            (m.cnpj || '').includes(q)
+                        );
+                    }
+                    
+                    if (this.mentionsDateFilter) {
+                        const parts = this.mentionsDateFilter.split('-');
+                        if(parts.length === 3) {
+                            const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                            result = result.filter(m => m.data === formattedDate);
+                        }
+                    }
+                    return result;
+                },
+
                 get suggestedCompanies() {
                     if(!this.companySearch) return [];
                     const q = this.companySearch.toLowerCase();
-                    return this.uniqueMentionedCompanies.filter(c => c.nome.toLowerCase().includes(q) || c.cnpj.includes(q)).slice(0, 10);
+                    return this.uniqueMentionedCompanies.filter(c => c.nome.toLowerCase().includes(q) || c.cnpj.includes(q));
                 },
 
                 toggleCompanyFilter(cnpj) {
@@ -922,9 +1314,68 @@
                     document.body.removeChild(link);
                 },
 
+                async exportFilteredPDF() {
+                    const mentions = this.selectedMentions.length > 0
+                        ? this.allMentions.filter(m => this.selectedMentions.includes(m.id))
+                        : this.filteredReports;
+                    if (!mentions.length) return this.showAlert('Nenhum dado para exportar', 'error');
+                    try {
+                        const r = await fetch('/api/export_mentions_pdf', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ mentions })
+                        });
+                        if (r.ok) {
+                            const blob = await r.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url; a.download = 'relatorio_mencoes.pdf'; a.click();
+                            URL.revokeObjectURL(url);
+                        }
+                    } catch(e) { this.showAlert('Erro ao gerar PDF', 'error'); }
+                },
+
+                async exportFilteredExcel() {
+                    const mentions = this.selectedMentions.length > 0
+                        ? this.allMentions.filter(m => this.selectedMentions.includes(m.id))
+                        : this.filteredReports;
+                    if (!mentions.length) return this.showAlert('Nenhum dado para exportar', 'error');
+                    try {
+                        const r = await fetch('/api/export_mentions_excel', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ mentions })
+                        });
+                        if (r.ok) {
+                            const blob = await r.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url; a.download = 'relatorio_mencoes.xlsx'; a.click();
+                            URL.revokeObjectURL(url);
+                        }
+                    } catch(e) { this.showAlert('Erro ao gerar Excel', 'error'); }
+                },
+
+                sendReportEmail() {
+                    const mentions = this.selectedMentions.length > 0
+                        ? this.allMentions.filter(m => this.selectedMentions.includes(m.id))
+                        : this.filteredReports;
+                    this.openEmailModal(mentions);
+                },
+
                 showAlert(msg, type = 'success') {
                     this.alert = { show: true, message: msg, type: type };
                     setTimeout(() => { this.alert.show = false }, 5000);
+                },
+
+                extendSession() {
+                    fetch('/api/extend_session', {method: 'POST'})
+                        .then(r => r.json())
+                        .then(d => {
+                            if(d.status === 'ok') {
+                                this.timeLeft = d.time_left;
+                            }
+                        });
                 },
 
                 openDetails(m) {
@@ -933,13 +1384,38 @@
                     this.$nextTick(() => lucide.createIcons());
                 },
 
+                async testSmtpConnection() {
+                    if (!this.testEmail) return this.showAlert('Por favor, informe o e-mail de teste', 'error');
+                    this.isTestingSmtp = true;
+                    try {
+                        const r = await fetch('/api/test_smtp', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ smtp: this.settings.smtp, test_email: this.testEmail })
+                        });
+                        const res = await r.json();
+                        this.showAlert(res.message, res.status);
+                    } catch(e) {
+                        this.showAlert('Erro de conexão ao testar SMTP', 'error');
+                    } finally {
+                        this.isTestingSmtp = false;
+                    }
+                },
+
+                
+
                 async triggerSync() {
                     this.isSyncing = true;
                     try {
                         const r = await fetch('/api/sync', {method: 'POST'});
                         const res = await r.json();
                         this.showAlert(res.message, res.status);
-                        if(res.status === 'success') setTimeout(() => window.location.reload(), 1500);
+                        if(res.status === 'success') {
+                            setTimeout(() => {
+                                this.fetchCompanies();
+                                this.showAlert('Lista de empresas atualizada!');
+                            }, 3000);
+                        }
                     } catch(e) { this.showAlert('Erro de conexão', 'error'); }
                     finally { this.isSyncing = false; }
                 },
@@ -971,11 +1447,13 @@
                             emails_raw: (r.emails || []).join(', '),
                             subject: r.subject || '',
                             type: r.type,
-                            description: r.description
+                            description: r.description,
+                            is_exact_search: r.is_exact_search !== undefined ? r.is_exact_search : true,
+                            terms_ignore_raw: (r.terms_ignore || []).join('\n')
                         };
                     } else {
                         this.editMode = false;
-                        this.currentR = { id: '', name: '', file: '', schedule: '0 5 * * *', simple_schedule: '0 5 * * *', terms_raw: '', organs_raw: '', sections: ['SECAO_1', 'SECAO_2', 'SECAO_3'], emails_raw: '', subject: '', type: 'custom' };
+                        this.currentR = { id: '', name: '', file: '', schedule: '0 5 * * *', simple_schedule: '0 5 * * *', terms_raw: '', organs_raw: '', sections: ['SECAO_1', 'SECAO_2', 'SECAO_3'], emails_raw: '', subject: '', type: 'custom', is_exact_search: true, terms_ignore_raw: '' };
                     }
                     this.routineModal = true;
                     this.$nextTick(() => lucide.createIcons());
@@ -988,18 +1466,34 @@
                 },
 
                 async saveRoutine() {
-                    if(!this.currentR.name && this.currentR.type !== 'sync') return this.showAlert('Nome é obrigatório', 'error');
+                    if(!this.currentR.name && this.currentR.type !== 'sync') return this.showAlert('Nome da rotina é obrigatório', 'error');
+                    
+                    const terms = this.currentR.terms_raw ? this.currentR.terms_raw.split('\n').map(t => t.trim()).filter(t => t) : [];
+                    const sections = this.currentR.sections || [];
+                    const emails = this.currentR.emails_raw ? this.currentR.emails_raw.split(/[\s,]+/).map(e => e.trim()).filter(e => e) : [];
+                    
+                    if(terms.length === 0) return this.showAlert('Adicione pelo menos um termo de busca', 'error');
+                    if(sections.length === 0) return this.showAlert('Selecione pelo menos uma seção do DOU', 'error');
+                    if(emails.length === 0) return this.showAlert('Adicione pelo menos um e-mail de destino', 'error');
+                    
+                    for(const email of emails) {
+                        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                            return this.showAlert(`E-mail inválido: ${email}`, 'error');
+                        }
+                    }
                     
                     const payload = {
                         file: this.currentR.file,
                         name: this.currentR.name,
                         schedule: this.currentR.schedule,
-                        terms: this.currentR.terms_raw ? this.currentR.terms_raw.split('\n').map(t => t.trim()).filter(t => t) : [],
+                        terms: terms,
                         organs: this.currentR.organs_raw ? this.currentR.organs_raw.split(',').map(o => o.trim()).filter(o => o) : [],
-                        sections: this.currentR.sections,
-                        emails: this.currentR.emails_raw ? this.currentR.emails_raw.split(/[\s,]+/).map(e => e.trim()).filter(e => e) : [],
+                        sections: sections,
+                        emails: emails,
                         subject: this.currentR.subject,
-                        description: this.editMode ? this.currentR.description : `Busca personalizada criada via painel em ${new Date().toLocaleDateString()}`
+                        description: this.editMode ? this.currentR.description : `Busca personalizada criada via painel em ${new Date().toLocaleDateString()}`,
+                        is_exact_search: this.currentR.is_exact_search,
+                        terms_ignore: this.currentR.terms_ignore_raw ? this.currentR.terms_ignore_raw.split('\n').map(t => t.trim()).filter(t => t) : []
                     };
 
                     try {
@@ -1017,12 +1511,105 @@
                     } catch(e) { this.showAlert('Erro ao salvar rotina', 'error'); }
                 },
 
-                async triggerRoutine(file) {
+                triggerRoutine(file) {
+                    this.triggerDateFile = file;
+                    this.triggerLogicalDate = ''; // Data atual (vazio)
+                    this.triggerDateModal = true;
+                },
+
+                async confirmTriggerRoutine() {
+                    this.triggerDateModal = false;
                     try {
-                        const r = await fetch(`/api/routines/trigger/${encodeURIComponent(file)}`, {method: 'POST'});
+                        const payload = {};
+                        if (this.triggerLogicalDate) {
+                            payload.logical_date = this.triggerLogicalDate;
+                        }
+                        const r = await fetch(`/api/routines/trigger/${encodeURIComponent(this.triggerDateFile)}`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(payload)
+                        });
                         const res = await r.json();
                         this.showAlert(res.message, res.status);
                     } catch(e) { this.showAlert('Erro ao iniciar busca', 'error'); }
+                },
+
+                openMonthlySearch(file) {
+                    this.monthlySearchFile = file;
+                    this.monthlySearchRoutine = 'single';
+                    this.monthlySearchRunning = false;
+                    this.monthlySearchProgress = '';
+                    this.monthlySearchPercent = 0;
+                    this.monthlySearchDetail = '';
+                    this.monthlySearchModal = true;
+                },
+
+                async startMonthlySearch() {
+                    const year = this.monthlySearchYear;
+                    const month = this.monthlySearchMonth;
+                    const now = new Date();
+                    const currentYear = now.getFullYear();
+                    const currentMonth = now.getMonth() + 1;
+                    
+                    let lastDay = new Date(year, month, 0).getDate();
+                    if (year === currentYear && month === currentMonth) {
+                        lastDay = now.getDate();
+                    }
+                    
+                    let routinesToSearch = [];
+                    const routine = this.routines.find(r => r.file === this.monthlySearchFile);
+                    if (routine) {
+                        routinesToSearch = [{file: routine.file, name: routine.id}];
+                    }
+                    
+                    if (routinesToSearch.length === 0) {
+                        this.showAlert('Rotina não encontrada', 'error');
+                        return;
+                    }
+                    
+                    const totalTriggers = lastDay * routinesToSearch.length;
+                    
+                    this.monthlySearchRunning = true;
+                    this.monthlySearchProgress = 'Preparando busca mensal...';
+                    this.monthlySearchPercent = 0;
+                    this.monthlySearchDetail = `${routinesToSearch.length} rotina(s) × ${lastDay} dias = ${totalTriggers} disparos`;
+                    
+                    let successCount = 0;
+                    let errorCount = 0;
+                    let triggerCount = 0;
+                    
+                    for (const routine of routinesToSearch) {
+                        for (let day = 1; day <= lastDay; day++) {
+                            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            this.monthlySearchProgress = `${routine.name} — Dia ${day}/${lastDay} (${dateStr})`;
+                            this.monthlySearchPercent = Math.round((triggerCount / totalTriggers) * 100);
+                            
+                            try {
+                                const r = await fetch(`/api/routines/trigger/${encodeURIComponent(routine.file)}`, {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({ logical_date: dateStr })
+                                });
+                                const res = await r.json();
+                                if (res.status === 'success') successCount++;
+                                else errorCount++;
+                            } catch(e) {
+                                errorCount++;
+                            }
+                            
+                            triggerCount++;
+                            
+                            if (triggerCount < totalTriggers) {
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                            }
+                        }
+                    }
+                    
+                    this.monthlySearchProgress = `Concluído! ${successCount} disparos com sucesso, ${errorCount} erros.`;
+                    this.monthlySearchPercent = 100;
+                    this.monthlySearchDetail = '';
+                    this.monthlySearchRunning = false;
+                    this.showAlert(`Busca mensal concluída! ${successCount} disparos realizados.`, successCount > 0 ? 'success' : 'error');
                 },
 
                 async deleteRoutine(file) {
@@ -1037,6 +1624,73 @@
                     } catch(e) { this.showAlert('Erro ao excluir rotina', 'error'); }
                 },
 
+                async                 openAddCompanyModal() {
+                    this.newCompany = {nome:'', cnpj:'', uf:'', cidade:'', email:'', telefone:'', situacao:'Ativa', status:true, origem:'Manual'};
+                    this.showAddCompanyModal = true;
+                },
+                closeAddCompanyModal() {
+                    this.showAddCompanyModal = false;
+                },
+                async submitNewCompany() {
+                    if(!this.newCompany.cnpj) {
+                        this.showAlert('CNPJ é obrigatório', 'error');
+                        return;
+                    }
+                    try {
+                        const res = await fetch('/api/companies', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(this.newCompany)
+                        });
+                        const data = await res.json();
+                        if(data.status === 'success') {
+                            this.showAlert('Empresa criada com sucesso!', 'success');
+                            this.closeAddCompanyModal();
+                            this.fetchCompanies();
+                        } else {
+                            this.showAlert(data.message, 'error');
+                        }
+                    } catch(e) {
+                        this.showAlert('Erro ao conectar', 'error');
+                    }
+                },
+                editingCompany: null,
+                showEditCompanyModal: false,
+                openEditCompany(c) {
+                    this.editingCompany = {
+                        id: c.id,
+                        nome: c.nome,
+                        email: c.email,
+                        telefone: c.telefone,
+                        situacao: c.situacao,
+                        status: c.status
+                    };
+                    this.showEditCompanyModal = true;
+                },
+                closeEditCompanyModal() {
+                    this.showEditCompanyModal = false;
+                    this.editingCompany = null;
+                },
+                async submitEditCompany() {
+                    if (!this.editingCompany) return;
+                    try {
+                        const res = await fetch(`/api/companies/${this.editingCompany.id}`, {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(this.editingCompany)
+                        });
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            this.showAlert('Empresa atualizada!', 'success');
+                            this.closeEditCompanyModal();
+                            this.fetchCompanies();
+                        } else {
+                            this.showAlert(data.message, 'error');
+                        }
+                    } catch(e) {
+                        this.showAlert('Erro ao conectar', 'error');
+                    }
+                },
                 async openHistory(company) {
                     this.selectedCompany = company;
                     this.companyHistory = [];
@@ -1088,13 +1742,225 @@
                     return `${m}:${s < 10 ? '0' : ''}${s}m`;
                 },
 
+                get uniqueUFs() {
+                    const ufs = new Set(this.companies.map(c => c.uf).filter(u => u && u !== 'N/A'));
+                    return Array.from(ufs).sort();
+                },
+                get uniqueOrigens() {
+                    const origens = new Set(this.companies.map(c => c.origem).filter(o => o && o !== 'N/A'));
+                    return Array.from(origens).sort();
+                },
                 get filteredCompanies() {
-                    if(!this.searchQuery) return this.companies.slice(0, 100);
-                    const q = this.searchQuery.toLowerCase();
-                    return this.companies.filter(c => c.nome.toLowerCase().includes(q) || c.cnpj.includes(q)).slice(0, 100);
+                    let res = this.companies;
+                    if(this.searchQuery) {
+                        const q = this.searchQuery.toLowerCase();
+                        res = res.filter(c => (c.nome || '').toLowerCase().includes(q) || (c.cnpj || '').includes(q));
+                    }
+                    if(this.ufFilter) res = res.filter(c => c.uf === this.ufFilter);
+                    if(this.origemFilter) res = res.filter(c => c.origem === this.origemFilter);
+                    if(this.statusFilter) res = res.filter(c => (this.statusFilter === 'true' ? c.status : !c.status));
+                    
+                    return res.sort((a, b) => (b.status === a.status) ? 0 : b.status ? 1 : -1).slice(0, 100);
+                },
+                
+                async exportPDF() {
+                    try {
+                        const r = await fetch('/api/export_pdf', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({companies: this.filteredCompanies})
+                        });
+                        if (r.ok) {
+                            const blob = await r.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url; a.download = 'relatorio_empresas.pdf'; a.click();
+                            URL.revokeObjectURL(url);
+                        }
+                    } catch(e) {
+                        this.showAlert('Erro ao gerar PDF', 'error');
+                    }
+                },
+
+                openEmailModal(mentions = []) {
+                    this.historyModalOpen = false;
+                    const defaultTpl = this.emailTemplates.find(t => t.name === 'Padrão Registrale');
+                    let bodyHtml = this.generateDefaultEmailBody(mentions);
+                    let subject = 'Notificação Registrale - Menções Detectadas no DOU';
+                    let templateId = '';
+                    if (defaultTpl) {
+                        templateId = defaultTpl.id;
+                        subject = defaultTpl.subject;
+                        bodyHtml = defaultTpl.body_html.replace('{content}', this.generateDefaultEmailBody(mentions));
+                    }
+                    this.emailForm = {
+                        mentions: mentions,
+                        to_emails: '',
+                        subject: subject,
+                        body_html: bodyHtml,
+                        templateId: templateId,
+                        showHtml: false
+                    };
+                    this.showEmailModal = true;
+                    this.$nextTick(() => lucide.createIcons());
+                },
+
+                closeEmailModal() {
+                    this.showEmailModal = false;
+                },
+
+                applyTemplate() {
+                    if (!this.emailForm.templateId) return;
+                    const tpl = this.emailTemplates.find(t => t.id == this.emailForm.templateId);
+                    if (tpl) {
+                        this.emailForm.subject = tpl.subject;
+                        let body = tpl.body_html;
+                        const mentions = this.emailForm.mentions || [];
+                        if (body.includes('{content}')) {
+                            body = body.replace('{content}', this.generateDefaultEmailBody(mentions));
+                        } else if (mentions.length > 0) {
+                            const m = mentions[0];
+                            body = body.replace(/\{empresa\}/g, m.empresa || '');
+                            body = body.replace(/\{cnpj\}/g, m.cnpj || '');
+                            body = body.replace(/\{secao\}/g, m.secao || '');
+                            body = body.replace(/\{data\}/g, m.data || '');
+                            body = body.replace(/\{trecho\}/g, m.trecho || '');
+                            body = body.replace(/\{link\}/g, m.link || '');
+                        }
+                        this.emailForm.body_html = body;
+                    }
+                },
+
+                generateDefaultEmailBody(mentions) {
+                    let html = '';
+                    if (!mentions || mentions.length === 0) return '<p>Nenhuma menção selecionada.</p>';
+                    mentions.forEach(m => {
+                        html += '<div style="margin-bottom:15px;padding:15px;background:#f8fafc;border-radius:8px;border-left:4px solid #2563eb;">';
+                        html += '<h4 style="margin:0 0 8px 0;color:#1e293b;font-size:15px;">' + (m.empresa || 'N/A') + '</h4>';
+                        html += '<p style="margin:0 0 4px 0;font-size:12px;color:#64748b;">CNPJ: ' + (m.cnpj || '') + ' | Seção: ' + (m.secao || 'N/A') + ' | Data: ' + (m.data || 'N/A') + '</p>';
+                        html += '<p style="margin:0 0 8px 0;font-size:14px;color:#475569;line-height:1.6;">' + (m.trecho || '') + '</p>';
+                        if (m.link) html += '<a href="' + m.link + '" target="_blank" style="color:#2563eb;text-decoration:none;font-weight:600;">Ver publicação completa →</a>';
+                        html += '</div>';
+                    });
+                    return html;
+                },
+
+                async sendEmail() {
+                    if (!this.emailForm.to_emails) return this.showAlert('Informe destinatários', 'error');
+                    const emails = this.emailForm.to_emails.split(/[,;]+/).map(e => e.trim()).filter(e => e);
+                    try {
+                        const r = await fetch('/api/send_email', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                to_emails: emails,
+                                subject: this.emailForm.subject,
+                                body_html: this.emailForm.body_html
+                            })
+                        });
+                        const res = await r.json();
+                        this.showAlert(res.message, res.status);
+                        if (res.status === 'success') this.closeEmailModal();
+                    } catch(e) {
+                        this.showAlert('Erro ao enviar email', 'error');
+                    }
+                },
+
+                async fetchCompanies() {
+                    this.loadingCompanies = true;
+                    try {
+                        const r = await fetch('/api/companies');
+                        this.companies = await r.json();
+                    } catch(e) { this.showAlert('Erro ao carregar empresas', 'error'); }
+                    finally { this.loadingCompanies = false; this.$nextTick(() => lucide.createIcons()); }
+                },
+
+                async fetchTemplates() {
+                    try {
+                        const r = await fetch('/api/templates');
+                        if (r.ok) {
+                            this.emailTemplates = await r.json();
+                        }
+                    } catch(e) { console.error('Erro ao carregar templates:', e); }
+                },
+
+                async saveTemplate() {
+                    if (!this.editingTemplate.name || !this.editingTemplate.subject || !this.editingTemplate.body_html) {
+                        return this.showAlert('Preencha todos os campos', 'error');
+                    }
+                    try {
+                        const r = await fetch('/api/templates', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                name: this.editingTemplate.name,
+                                subject: this.editingTemplate.subject,
+                                body_html: this.editingTemplate.body_html
+                            })
+                        });
+                        const res = await r.json();
+                        this.showAlert(res.message, res.status);
+                        if (res.status === 'success') {
+                            this.fetchTemplates();
+                            this.editingTemplate = {id:null, name:'', subject:'', body_html:'', showHtml: false};
+                        }
+                    } catch(e) { this.showAlert('Erro ao salvar template', 'error'); }
+                },
+
+                editTemplate(t) {
+                    this.editingTemplate = {id: t.id, name: t.name, subject: t.subject, body_html: t.body_html, showHtml: false};
+                },
+
+                async deleteTemplate(id) {
+                    if (!confirm('Tem certeza que deseja excluir este template?')) return;
+                    try {
+                        const r = await fetch('/api/templates/' + id, { method: 'DELETE' });
+                        const res = await r.json();
+                        this.showAlert(res.message, res.status);
+                        if (res.status === 'success') this.fetchTemplates();
+                    } catch(e) { this.showAlert('Erro ao deletar template', 'error'); }
+                },
+
+                formatCnpjMask(value) {
+                    let v = value.replace(/[^A-Za-z0-9]/g, '').substring(0, 14);
+                    if (v.length > 12) return v.replace(/^(\w{2})(\w{3})(\w{3})(\w{4})(\w{0,2})$/, '$1.$2.$3/$4-$5');
+                    if (v.length > 8) return v.replace(/^(\w{2})(\w{3})(\w{3})(\w{0,4})$/, '$1.$2.$3/$4');
+                    if (v.length > 5) return v.replace(/^(\w{2})(\w{3})(\w{0,3})$/, '$1.$2.$3');
+                    if (v.length > 2) return v.replace(/^(\w{2})(\w{0,3})$/, '$1.$2');
+                    return v;
+                },
+
+                async clearSystemData(type) {
+                    let msg = '';
+                    if (type === 'all') msg = 'Tem certeza que deseja APAGAR TODO O BANCO DE DADOS? Esta ação não pode ser desfeita!';
+                    else if (type === 'history') msg = 'Deseja apagar os arquivos de cache e histórico?';
+                    else if (type === 'mentions') msg = 'Deseja limpar as menções registradas no painel?';
+
+                    if(!confirm(msg)) return;
+                    
+                    try {
+                        const r = await fetch('/api/admin/clear_data', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ type })
+                        });
+                        const res = await r.json();
+                        this.showAlert(res.message, res.status);
+                        if(res.status === 'success') {
+                            setTimeout(() => window.location.reload(), 1500);
+                        }
+                    } catch(e) {
+                        this.showAlert('Erro ao processar limpeza', 'error');
+                    }
                 },
 
                 init() {
+                    setTimeout(() => {}, 100);
+
+                    if(this.darkMode) document.documentElement.classList.add('dark');
+                    
+                    this.fetchTemplates();
+                    
                     setInterval(() => { 
                         if(this.timeLeft > 0) {
                             this.timeLeft--;
@@ -1107,7 +1973,14 @@
                             this.loadingMentions = true;
                             fetch('/api/mentions')
                                 .then(r => r.json())
-                                .then(d => { this.allMentions = d; })
+                                .then(d => { 
+                                    this.allMentions = d.map(m => {
+                                        if(!m.id) {
+                                            m.id = 'fe_' + m.cnpj + '_' + Math.random().toString(36).substring(2, 15);
+                                        }
+                                        return m;
+                                    });
+                                })
                                 .catch(e => { this.showAlert('Erro ao carregar menções', 'error'); })
                                 .finally(() => { 
                                     this.loadingMentions = false; 
@@ -1115,15 +1988,7 @@
                                 });
                         }
                         if(value === 'companies' && this.companies.length === 0) {
-                            this.loadingCompanies = true;
-                            fetch('/api/companies')
-                                .then(r => r.json())
-                                .then(d => { this.companies = d; })
-                                .catch(e => { this.showAlert('Erro ao carregar empresas', 'error'); })
-                                .finally(() => { 
-                                    this.loadingCompanies = false; 
-                                    this.$nextTick(() => lucide.createIcons());
-                                });
+                            this.fetchCompanies();
                         }
                         if(value === 'routines') {
                             this.loadRoutines();
@@ -1135,5 +2000,170 @@
             }));
         });
     </script>
+                <!-- Modal: Enviar Email -->
+        <div x-show="showEmailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm" x-cloak>
+            <div @click.outside="closeEmailModal()" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-lg flex items-center gap-3"><i data-lucide="mail" class="w-5 h-5 text-slate-400"></i> Enviar Email de Notificação</h3>
+                    <button @click="closeEmailModal()" class="text-slate-400 hover:text-slate-600 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="p-6 overflow-y-auto space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Template</label>
+                            <select x-model="emailForm.templateId" @change="applyTemplate()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                                <template x-for="t in emailTemplates" :key="t.id">
+                                    <option :value="t.id" x-text="t.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Destinatários (separados por vírgula)</label>
+                            <input type="text" x-model="emailForm.to_emails" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="email@empresa.com">
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Assunto</label>
+                        <input type="text" x-model="emailForm.subject" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Corpo do Email</label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-500">Preview</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="emailForm.showHtml" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-stone-700"></div>
+                                </label>
+                                <span class="text-xs font-bold text-slate-500">Edição</span>
+                            </div>
+                        </div>
+                        <!-- Preview com iframe -->
+                        <div x-show="!emailForm.showHtml" class="border border-slate-200 rounded-xl overflow-hidden">
+                            <iframe class="w-full bg-white" style="min-height:300px;max-height:400px;border:none;" :srcdoc="emailForm.body_html"></iframe>
+                        </div>
+                        <!-- Edição com textarea -->
+                        <div x-show="emailForm.showHtml">
+                            <textarea x-model="emailForm.body_html" rows="10" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-slate-50 flex justify-end gap-3">
+                    <button @click="closeEmailModal()" class="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors">Cancelar</button>
+                    <button @click="sendEmail()" class="px-6 py-2.5 rounded-xl font-bold bg-stone-700 text-white hover:bg-stone-800 transition-colors flex items-center gap-2">Enviar Agora <i data-lucide="send" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Adicionar Empresa -->
+        <div x-show="showAddCompanyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm" x-cloak>
+            <div @click.outside="closeAddCompanyModal()" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-lg flex items-center gap-3"><i data-lucide="building-2" class="w-5 h-5 text-slate-400"></i> Adicionar Nova Empresa</h3>
+                    <button @click="closeAddCompanyModal()" class="text-slate-400 hover:text-slate-600 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="p-6 overflow-y-auto space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Razão Social *</label>
+                            <input type="text" x-model="newCompany.nome" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="Ex: Empresa Ltda">
+                            <p class="text-[10px] text-slate-400 mt-1">Nome oficial da empresa na Junta Comercial</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">CNPJ *</label>
+                            <input type="text" x-model="newCompany.cnpj" @input="newCompany.cnpj = formatCnpjMask($event.target.value)" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="XX.XXX.XXX/XXXX-XX">
+                            <p class="text-[10px] text-slate-400 mt-1">Cadastro Nacional da Pessoa Jurídica</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">UF</label>
+                            <input type="text" x-model="newCompany.uf" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="SP" maxlength="2">
+                            <p class="text-[10px] text-slate-400 mt-1">Sigla do estado (ex: SP, RJ, MG)</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Cidade</label>
+                            <input type="text" x-model="newCompany.cidade" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="São Paulo">
+                            <p class="text-[10px] text-slate-400 mt-1">Cidade sede da empresa</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Email de Contato</label>
+                            <input type="email" x-model="newCompany.email" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="contato@empresa.com">
+                            <p class="text-[10px] text-slate-400 mt-1">E-mail principal para notificações</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Telefone</label>
+                            <input type="text" x-model="newCompany.telefone" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none" placeholder="(11) 99999-9999">
+                            <p class="text-[10px] text-slate-400 mt-1">Telefone com DDD</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Situação Cadastral</label>
+                            <select x-model="newCompany.situacao" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                                <option value="Ativa">Ativa</option>
+                                <option value="Inativa">Inativa</option>
+                            </select>
+                            <p class="text-[10px] text-slate-400 mt-1">Status cadastral no CNPJ</p>
+                        </div>
+                        <div class="space-y-1 flex flex-col justify-end">
+                            <label class="flex items-center gap-2 cursor-pointer p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                                <input type="checkbox" x-model="newCompany.status" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="font-bold text-slate-700">Monitorar no DOU</span>
+                            </label>
+                            <p class="text-[10px] text-slate-400 mt-1">Ativar monitoramento automático</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-slate-50 flex justify-end gap-3">
+                    <button @click="closeAddCompanyModal()" class="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors">Cancelar</button>
+                    <button @click="submitNewCompany()" class="px-8 py-2.5 rounded-xl font-bold bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg active:scale-95">
+                        <i data-lucide="check" class="w-4 h-4"></i> Salvar Empresa
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Editar Empresa -->
+        <div x-show="showEditCompanyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm" x-cloak>
+            <div @click.outside="closeEditCompanyModal()" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-lg flex items-center gap-3"><i data-lucide="pencil" class="w-5 h-5 text-slate-400"></i> Editar Empresa</h3>
+                    <button @click="closeEditCompanyModal()" class="text-slate-400 hover:text-slate-600 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="p-6 overflow-y-auto space-y-5" x-show="editingCompany">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Razão Social</label>
+                            <input type="text" x-model="editingCompany.nome" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Email de Contato</label>
+                            <input type="email" x-model="editingCompany.email" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Telefone</label>
+                            <input type="text" x-model="editingCompany.telefone" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Situação Cadastral</label>
+                            <select x-model="editingCompany.situacao" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                                <option value="Ativa">Ativa</option>
+                                <option value="Inativa">Inativa</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1 flex flex-col justify-end">
+                            <label class="flex items-center gap-2 cursor-pointer p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                                <input type="checkbox" x-model="editingCompany.status" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="font-bold text-slate-700">Monitorar no DOU</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-slate-50 flex justify-end gap-3">
+                    <button @click="closeEditCompanyModal()" class="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors">Cancelar</button>
+                    <button @click="submitEditCompany()" class="px-8 py-2.5 rounded-xl font-bold bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg active:scale-95">
+                        <i data-lucide="check" class="w-4 h-4"></i> Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+
 </body>
 </html>
