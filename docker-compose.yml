@@ -151,7 +151,7 @@ services:
       - ./data:/app/data
       - ./dag_confs:/app/dag_confs
       - ./mnt/airflow-logs:/app/mnt/airflow-logs
-      - .env:/app/.env
+      - ./.env:/app/.env
     environment:
       - AIRFLOW_URL=http://airflow-webserver:8080
     restart: always
