@@ -1,5 +1,6 @@
 .PHONY: run
 run: \
+create-env-file \
 create-logs-dir \
 build \
 setup-containers \
@@ -17,6 +18,9 @@ create-azure-openai-endpoint-variable \
 create-azure-openai-api-version-variable \
 create-azure-openai-deployment-variable \
 create-azure-openai-api-key-variable
+
+create-env-file:
+	-python -c "import shutil, os; os.path.exists('.env') or shutil.copy('.env.example', '.env')"
 
 create-logs-dir:
 	-mkdir .\mnt\airflow-logs
