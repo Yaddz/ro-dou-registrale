@@ -201,6 +201,7 @@ def executar_sincronizacao():
         except Exception as e:
             logging.error(f"Erro ao tentar ler settings.json: {e}")
 
+    url_api = url_api or "https://api.gestaoclick.com/franquias"
     if not all([url_api, access_token, secret_token]):
         logging.error("Credenciais ausentes no .env e no settings.json")
         return
