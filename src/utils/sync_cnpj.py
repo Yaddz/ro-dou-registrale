@@ -202,6 +202,7 @@ def executar_sincronizacao():
             logging.error(f"Erro ao tentar ler settings.json: {e}")
 
     url_api = url_api or "https://api.gestaoclick.com/franquias"
+    arquivo_yaml = arquivo_yaml or "dag_confs/Pesquisa_cnpj_sync.yaml"
     if not all([url_api, access_token, secret_token]):
         logging.error("Credenciais ausentes no .env e no settings.json")
         return
